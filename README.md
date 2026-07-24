@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏆 RUSHHOUR  2026
+# 🏆 RUSHHOUR 2026
 ## 24-Hour National Engineering Challenge
 
 <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=700&size=28&duration=3500&pause=1200&color=8A2BE2&center=true&vCenter=true&width=900&lines=National+Engineering+Hackathon;Innovate+%E2%80%A2+Build+%E2%80%A2+Solve+%E2%80%A2+Impact;Team+Avenix;AI-Based+Autonomous+Fire+Suppression+Robot" />
