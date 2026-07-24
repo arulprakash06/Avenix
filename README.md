@@ -111,5 +111,240 @@ By combining intelligent fire detection, autonomous navigation, obstacle avoidan
 </div>
 <img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/44c9b45b-a7de-42ed-873d-7736d79d36e0" />
 
+<<<OUR CODE>>>
+
+#include <WiFi.h>
+#include <WebServer.h>
+
+// --- Wi-Fi Configuration ---
+const char *ssid = "SIST-Hackathon-2026";
+const char *password = "sbu123!@#";
+
+// --- Pin Mapping (ESP32 DevKit V1) ---
+// L298N Motor Driver
+#define ENA 13
+#define IN1 27
+#define IN2 26
+#define ENB 14
+#define IN3 25
+#define IN4 33
+
+// HC-SR04 Ultrasonic Sensor
+#define TRIG_PIN 5
+#define ECHO_PIN 18
+
+// Flame Sensors (Digital Outputs)
+#define FLAME_LEFT   34
+#define FLAME_CENTER 35
+#define FLAME_RIGHT  32
+
+// --- Robot State Variables ---
+bool autoMode = false;
+String botStatus = "Stopped";
+
+WebServer server(80);
+
+// --- Motor Speed Control ---
+void setMotorSpeed(int speed) {
+  analogWrite(ENA, speed);
+  analogWrite(ENB, speed);
+}
+
+// --- Direction Commands ---
+void stopMotors() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  botStatus = "Stopped";
+}
+
+void moveForward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  botStatus = "Moving Forward";
+}
+
+void turnLeft() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  botStatus = "Turning Left";
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  botStatus = "Turning Right";
+}
+
+// --- Sensor Functions ---
+long getDistanceCM() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
+  if (duration == 0) return 999;
+  return duration * 0.034 / 2;
+}
+
+bool isFireDetected() {
+  // Flame sensors output LOW when flame is detected
+  return (digitalRead(FLAME_LEFT) == LOW || 
+          digitalRead(FLAME_CENTER) == LOW || 
+          digitalRead(FLAME_RIGHT) == LOW);
+}
+
+// --- Auto Mode Handler ---
+void handleAutoMode() {
+  if (isFireDetected()) {
+    stopMotors();
+    botStatus = "🔥 FIRE DETECTED!";
+    return;
+  }
+
+  long distance = getDistanceCM();
+  if (distance < 20) { // Object closer than 20cm
+    stopMotors();
+    delay(200);
+    turnRight(); // Obstacle dodge maneuver
+    delay(400);
+  } else {
+    moveForward();
+    botStatus = "Auto Navigating...";
+  }
+}
+
+// --- Built-in Web Page HTML/CSS/JS ---
+const char HTTP_WEBPAGE[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ESP32 DevKit V1 Bot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: #ffffff; margin: 0; padding: 20px; }
+        h2 { color: #00e676; margin-bottom: 5px; }
+        .status { font-size: 18px; margin: 15px 0; font-weight: bold; color: #ffeb3b; }
+        .mode-box { margin-bottom: 20px; }
+        .mode-btn { padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin: 5px; }
+        .btn-manual { background: #2196f3; color: white; }
+        .btn-auto { background: #ff9800; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(3, 80px); grid-gap: 12px; justify-content: center; }
+        .btn { width: 80px; height: 80px; background: #333; color: white; font-size: 24px; font-weight: bold; border: 2px solid #555; border-radius: 12px; touch-action: manipulation; }
+        .btn:active { background: #555; }
+        .stop { background: #f44336; border: none; }
+        .empty { visibility: hidden; }
+    </style>
+</head>
+<body>
+    <h2>ESP32 Robot Control</h2>
+    <div class="status" id="bot-status">Status: Initializing...</div>
+
+    <div class="mode-box">
+        <button class="mode-btn btn-manual" onclick="sendCommand('manual')">Manual Mode</button>
+        <button class="mode-btn btn-auto" onclick="sendCommand('auto')">Auto Mode</button>
+    </div>
+
+    <div class="grid">
+        <div class="empty"></div>
+        <button class="btn" onclick="sendCommand('forward')">▲</button>
+        <div class="empty"></div>
+        
+        <button class="btn" onclick="sendCommand('left')">◀</button>
+        <button class="btn stop" onclick="sendCommand('stop')">■</button>
+        <button class="btn" onclick="sendCommand('right')">▶</button>
+    </div>
+
+    <script>
+        function sendCommand(cmd) {
+            fetch('/' + cmd);
+        }
+        setInterval(() => {
+            fetch('/status').then(res => res.text()).then(txt => {
+                document.getElementById('bot-status').innerText = "Status: " + txt;
+            });
+        }, 1000);
+    </script>
+</body>
+</html>
+)rawliteral";
+
+// --- Server Routes Setup ---
+void setupServerRoutes() {
+  server.on("/", HTTP_GET, []() {
+    server.send(200, "text/html", HTTP_WEBPAGE);
+  });
+
+  server.on("/manual", HTTP_GET, []() {
+    autoMode = false;
+    stopMotors();
+    server.send(200, "text/plain", "OK");
+  });
+
+  server.on("/auto", HTTP_GET, []() {
+    autoMode = true;
+    server.send(200, "text/plain", "OK");
+  });
+
+  server.on("/forward", HTTP_GET, []() { if(!autoMode) moveForward(); server.send(200, "text/plain", "OK"); });
+  server.on("/left", HTTP_GET, []() { if(!autoMode) turnLeft(); server.send(200, "text/plain", "OK"); });
+  server.on("/right", HTTP_GET, []() { if(!autoMode) turnRight(); server.send(200, "text/plain", "OK"); });
+  server.on("/stop", HTTP_GET, []() { if(!autoMode) stopMotors(); server.send(200, "text/plain", "OK"); });
+
+  server.on("/status", HTTP_GET, []() {
+    server.send(200, "text/plain", autoMode ? "AUTO MODE - " + botStatus : "MANUAL MODE - " + botStatus);
+  });
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Configure Motor Control Pins
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  setMotorSpeed(200); // Set default PWM motor speed (0-255)
+  stopMotors();
+
+  // Configure Sensor Pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  pinMode(FLAME_LEFT, INPUT);
+  pinMode(FLAME_CENTER, INPUT);
+  pinMode(FLAME_RIGHT, INPUT);
+
+  // Start Wi-Fi Access Point
+  WiFi.softAP(ssid, password);
+  Serial.println("\n--- WiFi Access Point Started ---");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.softAPIP());
+
+  // Start Web Server
+  setupServerRoutes();
+  server.begin();
+  Serial.println("Web server running.");
+}
+
+void loop() {
+  server.handleClient();
+
+  if (autoMode) {
+    handleAutoMode();
+  }
+}
+
 <img width="1062" height="727" alt="WhatsApp Image 2026-07-24 at 4 38 28 PM" src="https://github.com/user-attachments/assets/a52eca10-6866-46c3-9127-d6d3ebb3a7d1" />
 
