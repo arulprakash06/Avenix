@@ -111,240 +111,214 @@ By combining intelligent fire detection, autonomous navigation, obstacle avoidan
 </div>
 <img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/44c9b45b-a7de-42ed-873d-7736d79d36e0" />
 
-<<<OUR CODE>>>
+# 💻 Code Implementation
 
-#include <WiFi.h>
-#include <WebServer.h>
+## 📡 Wi-Fi Access Point
 
-// --- Wi-Fi Configuration ---
+```cpp
 const char *ssid = "SIST-Hackathon-2026";
 const char *password = "sbu123!@#";
 
-// --- Pin Mapping (ESP32 DevKit V1) ---
-// L298N Motor Driver
-#define ENA 13
-#define IN1 27
-#define IN2 26
-#define ENB 14
-#define IN3 25
-#define IN4 33
+WiFi.softAP(ssid, password);
 
-// HC-SR04 Ultrasonic Sensor
-#define TRIG_PIN 5
-#define ECHO_PIN 18
+Serial.println("WiFi Access Point Started");
+Serial.println(WiFi.softAPIP());
+```
 
-// Flame Sensors (Digital Outputs)
-#define FLAME_LEFT   34
-#define FLAME_CENTER 35
-#define FLAME_RIGHT  32
+---
 
-// --- Robot State Variables ---
-bool autoMode = false;
-String botStatus = "Stopped";
+## 🌐 Web Server Initialization
 
+```cpp
 WebServer server(80);
 
-// --- Motor Speed Control ---
-void setMotorSpeed(int speed) {
-  analogWrite(ENA, speed);
-  analogWrite(ENB, speed);
-}
-
-// --- Direction Commands ---
-void stopMotors() {
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-  botStatus = "Stopped";
-}
-
-void moveForward() {
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  botStatus = "Moving Forward";
-}
-
-void turnLeft() {
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  botStatus = "Turning Left";
-}
-
-void turnRight() {
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  botStatus = "Turning Right";
-}
-
-// --- Sensor Functions ---
-long getDistanceCM() {
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-  
-  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
-  if (duration == 0) return 999;
-  return duration * 0.034 / 2;
-}
-
-bool isFireDetected() {
-  // Flame sensors output LOW when flame is detected
-  return (digitalRead(FLAME_LEFT) == LOW || 
-          digitalRead(FLAME_CENTER) == LOW || 
-          digitalRead(FLAME_RIGHT) == LOW);
-}
-
-// --- Auto Mode Handler ---
-void handleAutoMode() {
-  if (isFireDetected()) {
-    stopMotors();
-    botStatus = "🔥 FIRE DETECTED!";
-    return;
-  }
-
-  long distance = getDistanceCM();
-  if (distance < 20) { // Object closer than 20cm
-    stopMotors();
-    delay(200);
-    turnRight(); // Obstacle dodge maneuver
-    delay(400);
-  } else {
-    moveForward();
-    botStatus = "Auto Navigating...";
-  }
-}
-
-// --- Built-in Web Page HTML/CSS/JS ---
-const char HTTP_WEBPAGE[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ESP32 DevKit V1 Bot</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: #ffffff; margin: 0; padding: 20px; }
-        h2 { color: #00e676; margin-bottom: 5px; }
-        .status { font-size: 18px; margin: 15px 0; font-weight: bold; color: #ffeb3b; }
-        .mode-box { margin-bottom: 20px; }
-        .mode-btn { padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin: 5px; }
-        .btn-manual { background: #2196f3; color: white; }
-        .btn-auto { background: #ff9800; color: white; }
-        .grid { display: grid; grid-template-columns: repeat(3, 80px); grid-gap: 12px; justify-content: center; }
-        .btn { width: 80px; height: 80px; background: #333; color: white; font-size: 24px; font-weight: bold; border: 2px solid #555; border-radius: 12px; touch-action: manipulation; }
-        .btn:active { background: #555; }
-        .stop { background: #f44336; border: none; }
-        .empty { visibility: hidden; }
-    </style>
-</head>
-<body>
-    <h2>ESP32 Robot Control</h2>
-    <div class="status" id="bot-status">Status: Initializing...</div>
-
-    <div class="mode-box">
-        <button class="mode-btn btn-manual" onclick="sendCommand('manual')">Manual Mode</button>
-        <button class="mode-btn btn-auto" onclick="sendCommand('auto')">Auto Mode</button>
-    </div>
-
-    <div class="grid">
-        <div class="empty"></div>
-        <button class="btn" onclick="sendCommand('forward')">▲</button>
-        <div class="empty"></div>
-        
-        <button class="btn" onclick="sendCommand('left')">◀</button>
-        <button class="btn stop" onclick="sendCommand('stop')">■</button>
-        <button class="btn" onclick="sendCommand('right')">▶</button>
-    </div>
-
-    <script>
-        function sendCommand(cmd) {
-            fetch('/' + cmd);
-        }
-        setInterval(() => {
-            fetch('/status').then(res => res.text()).then(txt => {
-                document.getElementById('bot-status').innerText = "Status: " + txt;
-            });
-        }, 1000);
-    </script>
-</body>
-</html>
-)rawliteral";
-
-// --- Server Routes Setup ---
 void setupServerRoutes() {
-  server.on("/", HTTP_GET, []() {
-    server.send(200, "text/html", HTTP_WEBPAGE);
-  });
 
-  server.on("/manual", HTTP_GET, []() {
-    autoMode = false;
-    stopMotors();
-    server.send(200, "text/plain", "OK");
-  });
+    server.on("/", HTTP_GET, []() {
+        server.send(200, "text/html", HTTP_WEBPAGE);
+    });
 
-  server.on("/auto", HTTP_GET, []() {
-    autoMode = true;
-    server.send(200, "text/plain", "OK");
-  });
+    server.on("/manual", HTTP_GET, []() {
+        autoMode = false;
+        stopMotors();
+        server.send(200,"text/plain","OK");
+    });
 
-  server.on("/forward", HTTP_GET, []() { if(!autoMode) moveForward(); server.send(200, "text/plain", "OK"); });
-  server.on("/left", HTTP_GET, []() { if(!autoMode) turnLeft(); server.send(200, "text/plain", "OK"); });
-  server.on("/right", HTTP_GET, []() { if(!autoMode) turnRight(); server.send(200, "text/plain", "OK"); });
-  server.on("/stop", HTTP_GET, []() { if(!autoMode) stopMotors(); server.send(200, "text/plain", "OK"); });
+    server.on("/auto", HTTP_GET, []() {
+        autoMode = true;
+        server.send(200,"text/plain","OK");
+    });
 
-  server.on("/status", HTTP_GET, []() {
-    server.send(200, "text/plain", autoMode ? "AUTO MODE - " + botStatus : "MANUAL MODE - " + botStatus);
-  });
+    server.begin();
+}
+```
+
+---
+
+## 🚗 Motor Control
+
+```cpp
+void moveForward() {
+
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+
+    botStatus = "Moving Forward";
 }
 
-void setup() {
-  Serial.begin(115200);
+void stopMotors() {
 
-  // Configure Motor Control Pins
-  pinMode(ENA, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-  setMotorSpeed(200); // Set default PWM motor speed (0-255)
-  stopMotors();
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
 
-  // Configure Sensor Pins
-  pinMode(TRIG_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
 
-  pinMode(FLAME_LEFT, INPUT);
-  pinMode(FLAME_CENTER, INPUT);
-  pinMode(FLAME_RIGHT, INPUT);
-
-  // Start Wi-Fi Access Point
-  WiFi.softAP(ssid, password);
-  Serial.println("\n--- WiFi Access Point Started ---");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.softAPIP());
-
-  // Start Web Server
-  setupServerRoutes();
-  server.begin();
-  Serial.println("Web server running.");
+    botStatus = "Stopped";
 }
+```
 
+---
+
+## 📏 Ultrasonic Distance Measurement
+
+```cpp
+long getDistanceCM() {
+
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+
+    digitalWrite(TRIG_PIN, LOW);
+
+    long duration = pulseIn(ECHO_PIN, HIGH, 30000);
+
+    if(duration == 0)
+        return 999;
+
+    return duration * 0.034 / 2;
+}
+```
+
+---
+
+## 🔥 Fire Detection
+
+```cpp
+bool isFireDetected() {
+
+    return (
+
+        digitalRead(FLAME_LEFT) == LOW ||
+
+        digitalRead(FLAME_CENTER) == LOW ||
+
+        digitalRead(FLAME_RIGHT) == LOW
+
+    );
+}
+```
+
+---
+
+## 🤖 Autonomous Navigation
+
+```cpp
+void handleAutoMode() {
+
+    if(isFireDetected()) {
+
+        stopMotors();
+
+        botStatus = "🔥 FIRE DETECTED!";
+
+        return;
+    }
+
+    long distance = getDistanceCM();
+
+    if(distance < 20) {
+
+        stopMotors();
+
+        delay(200);
+
+        turnRight();
+
+        delay(400);
+
+    }
+
+    else {
+
+        moveForward();
+
+        botStatus = "Auto Navigating...";
+    }
+}
+```
+
+---
+
+## 🔄 Main Loop
+
+```cpp
 void loop() {
-  server.handleClient();
 
-  if (autoMode) {
-    handleAutoMode();
-  }
+    server.handleClient();
+
+    if(autoMode) {
+
+        handleAutoMode();
+
+    }
 }
+```
+
+---
+
+## 📊 Program Flow
+
+```mermaid
+flowchart TD
+
+A[Power ON]
+
+A --> B[Initialize ESP32]
+
+B --> C[Create Wi-Fi Hotspot]
+
+C --> D[Start Web Server]
+
+D --> E[Wait for User]
+
+E --> F{Auto Mode?}
+
+F -->|No| G[Manual Control]
+
+F -->|Yes| H[Read Flame Sensors]
+
+H --> I{Fire Detected?}
+
+I -->|Yes| J[Stop Motors]
+
+I -->|No| K[Read Ultrasonic]
+
+K --> L{Obstacle <20cm?}
+
+L -->|Yes| M[Turn Right]
+
+L -->|No| N[Move Forward]
+
+N --> H
+
+M --> H
+```
 
 <img width="1062" height="727" alt="WhatsApp Image 2026-07-24 at 4 38 28 PM" src="https://github.com/user-attachments/assets/a52eca10-6866-46c3-9127-d6d3ebb3a7d1" />
 
@@ -378,4 +352,275 @@ void loop() {
 
 ---
 
+# 🔥 Adaptive Fire Source Localization & Path Planning Engine
+
+<div align="center">
+
+![AI](https://img.shields.io/badge/AI-Enabled-red?style=for-the-badge)
+![ROS](https://img.shields.io/badge/Real--Time-Navigation-blue?style=for-the-badge)
+![Sensors](https://img.shields.io/badge/Sensor-Fusion-orange?style=for-the-badge)
+![Status](https://img.shields.io/badge/Project-Hackathon-success?style=for-the-badge)
+
+### 🚒 Intelligent Fire Detection • Dynamic Path Planning • Autonomous Navigation
+
+</div>
+
+---
+
+# 📌 Problem Statement
+
+Design an **AI-powered real-time navigation engine** that can:
+
+- 🔥 Detect and localize moving fire sources.
+- 📷 Fuse Camera, Flame Sensor & Ultrasonic Sensor data.
+- 🧠 Compute the safest path automatically.
+- 🚗 Dynamically replan navigation when obstacles appear.
+- 🎯 Continuously adjust nozzle aiming.
+- ⚡ Achieve all of the above **without adding new hardware**.
+
+---
+
+# ✨ Our Solution
+
+Our solution combines **Sensor Fusion + Artificial Intelligence + Dynamic Path Planning** into a single autonomous decision engine.
+
+Instead of relying on only one sensor, the robot continuously fuses information from:
+
+- 📷 Camera
+- 🔥 Flame Sensor
+- 📡 Ultrasonic Sensor
+
+The AI estimates the exact fire location, predicts movement, avoids obstacles, and continuously updates the navigation path in real time.
+
+---
+
+# 🚀 System Workflow
+
+```mermaid
+flowchart TD
+
+A[📷 Camera]
+B[🔥 Flame Sensor]
+C[📡 Ultrasonic Sensor]
+
+A --> D
+B --> D
+C --> D
+
+D[🧠 Sensor Fusion Engine]
+
+D --> E[🔥 Fire Localization]
+
+E --> F[🧭 AI Path Planning]
+
+F --> G[🚗 Robot Navigation]
+
+G --> H[🎯 Nozzle Targeting]
+
+H --> I{Fire Moving?}
+
+I -- Yes --> E
+I -- No --> J[✅ Fire Extinguished]
+```
+
+---
+
+# ⚙️ AI Decision Pipeline
+
+```text
+Camera Frame
+      │
+      ▼
+Fire Detection (YOLO / OpenCV)
+      │
+      ▼
+Flame Sensor Validation
+      │
+      ▼
+Ultrasonic Obstacle Mapping
+      │
+      ▼
+Sensor Fusion
+      │
+      ▼
+Fire Coordinate Estimation
+      │
+      ▼
+A* / Dijkstra Path Planning
+      │
+      ▼
+Real-Time Navigation
+      │
+      ▼
+Dynamic Replanning
+      │
+      ▼
+Nozzle Alignment
+```
+
+---
+
+# 🧠 Core Features
+
+### 🔥 Fire Source Localization
+
+- Detects fire using computer vision.
+- Confirms detection using flame sensor.
+- Calculates precise fire coordinates.
+
+---
+
+### 📡 Sensor Fusion
+
+Combines data from:
+
+- Camera
+- Flame Sensor
+- Ultrasonic Sensor
+
+This improves accuracy and reduces false detections.
+
+---
+
+### 🚗 Dynamic Path Planning
+
+The robot computes the safest path by considering:
+
+- Obstacles
+- Fire position
+- Robot orientation
+- Safe distance
+
+If the environment changes, the path is recalculated instantly.
+
+---
+
+### 🎯 Intelligent Nozzle Targeting
+
+Once the robot reaches the target,
+
+- predicts fire movement,
+- aligns nozzle automatically,
+- continuously adjusts aiming.
+
+---
+
+### ⚡ Real-Time Replanning
+
+Whenever:
+
+- obstacle detected
+- fire moves
+- robot deviates
+
+the navigation algorithm immediately generates a new optimal path.
+
+---
+
+# 🏗 System Architecture
+
+```mermaid
+graph LR
+
+Camera --> Fusion
+FlameSensor --> Fusion
+Ultrasonic --> Fusion
+
+Fusion --> Localization
+
+Localization --> Planner
+
+Planner --> Navigation
+
+Navigation --> Robot
+
+Robot --> Nozzle
+
+Nozzle --> Fire
+```
+
+---
+
+# 🛠 Technologies
+
+| Module | Technology |
+|---------|------------|
+| Fire Detection | OpenCV / YOLO |
+| Sensor Fusion | AI Decision Engine |
+| Navigation | A* Path Planning |
+| Obstacle Detection | Ultrasonic Sensor |
+| Localization | Camera + Flame Sensor |
+| Robot Control | Arduino / ESP32 |
+| Programming | Python + C++ |
+
+---
+
+# 🎯 Advantages
+
+✅ No additional hardware required
+
+✅ Real-time fire localization
+
+✅ Intelligent sensor fusion
+
+✅ Dynamic obstacle avoidance
+
+✅ Continuous path replanning
+
+✅ Autonomous nozzle targeting
+
+✅ Faster fire response
+
+---
+
+# 📈 Future Improvements
+
+- 🔥 Thermal Camera Integration
+- 🤖 Reinforcement Learning Navigation
+- 🛰 Multi-Robot Collaboration
+- ☁ Cloud Monitoring Dashboard
+- 📱 Mobile App Control
+- 📊 AI Fire Prediction
+
+---
+
+# 🎬 Project Overview
+
+```mermaid
+sequenceDiagram
+
+participant Camera
+participant Sensors
+participant AI
+participant Robot
+participant Fire
+
+Camera->>AI: Detect Fire
+
+Sensors->>AI: Validate Fire
+
+AI->>Robot: Calculate Safe Path
+
+Robot->>Fire: Navigate
+
+Fire-->>AI: Position Changed
+
+AI->>Robot: Replan Path
+
+Robot->>Fire: Aim Nozzle
+
+Robot->>Fire: Extinguish Fire
+```
+
+---
+
+<div align="center">
+
+## 🚒 Smart • Adaptive • Autonomous
+
+### **"Detect → Localize → Navigate → Replan → Extinguish"**
+
+⭐ Built for Hackathon Innovation ⭐
+
+</div>
 
