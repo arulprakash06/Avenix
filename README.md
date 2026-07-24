@@ -67,7 +67,7 @@ Our solution demonstrates how AI and robotics can work together to create safer,
 
 | No | Name | Role |
 |----|------|------|
-| 01 | S.A. Dharaneesh | Team Leader |
+| 01 | Dharaneesh SA | Team Leader |
 | 02 | Gokula Kannan S | Team Member |
 | 03 | Arul Prakash S | Team Member |
 | 04 | Kumaravelu S | Team Member |
