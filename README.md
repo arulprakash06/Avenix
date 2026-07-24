@@ -36,13 +36,13 @@ Our team participated with the goal of building an intelligent robotic system ca
 
 # 🤖 Project Name
 
-# **AI-Based Autonomous Fire Suppression Robot**
+# **IGNIS BOT**
 
 ---
 
 # 📖 Project Description
 
-The **AI-Based Autonomous Fire Suppression Robot** is an intelligent robotic system developed to detect, monitor, and extinguish fire with minimal human intervention.
+The **IGNIS BOT** is an intelligent robotic system developed to detect, monitor, and extinguish fire with minimal human intervention.
 
 The robot combines **Artificial Intelligence**, **Computer Vision**, **Embedded Systems**, and **IoT** technologies to improve firefighting efficiency while reducing the risks faced by emergency responders.
 
