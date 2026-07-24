@@ -71,7 +71,7 @@ Our solution demonstrates how AI and robotics can work together to create safer,
 | 02 | Gokula Kannan S | Team Member |
 | 03 | Arul Prakash S | Team Member |
 | 04 | Kumaravelu S | Team Member |
-| 05 | Akilesh L | Team Member |
+| 05 | Akhilesh L | Team Member |
 | 06 | Muhammad Thoufik Ansari N | Team Member |
 
 ---
