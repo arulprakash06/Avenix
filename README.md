@@ -109,3 +109,4 @@ By combining intelligent fire detection, autonomous navigation, obstacle avoidan
 ⭐ *Thank you for visiting our project repository!*
 
 </div>
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/44c9b45b-a7de-42ed-873d-7736d79d36e0" />
