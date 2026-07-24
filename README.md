@@ -348,3 +348,34 @@ void loop() {
 
 <img width="1062" height="727" alt="WhatsApp Image 2026-07-24 at 4 38 28 PM" src="https://github.com/user-attachments/assets/a52eca10-6866-46c3-9127-d6d3ebb3a7d1" />
 
+
+<div align="center">
+
+# 🚨 ZEROTH HOUR 🚨
+
+### 🔥 *Adaptive Fire Source Localization & Intelligent Path Planning Engine*
+
+<img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=700&size=28&duration=2500&pause=1000&color=FF3B3B&center=true&vCenter=true&width=900&lines=🚒+Detect+.+Locate+.+Navigate.;🧠+AI-Powered+Fire+Localization.;📡+Sensor+Fusion+Without+Extra+Hardware.;⚡+Real-Time+Dynamic+Path+Planning.;🎯+Autonomous+Nozzle+Targeting.;🔥+ZEROTH+HOUR" alt="Typing SVG" />
+
+<br>
+
+<img src="https://img.shields.io/badge/Hackathon-Innovation-red?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/AI-Enabled-orange?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Real--Time-Navigation-blue?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Status-Prototype-success?style=for-the-badge"/>
+
+<br><br>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=ff4d4d,ff9900&height=220&section=header&text=ZEROTH%20HOUR&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Adaptive%20Fire%20Source%20Localization%20%7C%20AI%20Path%20Planning&descAlignY=58"/>
+
+</div>
+
+---
+
+## 🎯 Motto
+
+> **"Every Second Counts. Every Decision Saves Lives."**
+
+---
+
+
