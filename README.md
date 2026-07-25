@@ -624,3 +624,119 @@ Robot->>Fire: Extinguish Fire
 
 </div>
 
+# 🧠 AI & Machine Learning Engine
+
+<div align="center">
+
+
+
+<h3>🚀 Intelligent Fire Detection Powered by Machine Learning</h3>
+
+<p>
+The <b>Adaptive Fire Source Localization and Path Planning Engine</b> uses
+<b>Machine Learning</b> to analyze real-time data from the <b>camera</b>,
+<b>flame sensor</b>, and <b>ultrasonic sensor</b>. By fusing multiple sensor inputs,
+the AI accurately identifies fire locations, predicts movement, detects obstacles,
+and computes the safest navigation path. The system continuously replans its route
+and precisely aligns the water nozzle, enabling fast and reliable fire suppression
+without requiring any additional hardware.
+</p>
+
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=24&duration=3000&pause=1000&color=FF6A00&center=true&vCenter=true&width=800&lines=🧠+Machine+Learning;📷+Computer+Vision;🔥+Fire+Localization;🛰️+Sensor+Fusion;🤖+Dynamic+Path+Planning;🎯+Real-Time+Decision+Making"/>
+
+</div>
+
+
+> **"See • Analyze • Decide • Navigate • Extinguish"** 🔥🤖
+
+<img width="1703" height="917" alt="Screenshot 2026-07-25 071354" src="https://github.com/user-attachments/assets/43d141a3-6191-46cf-ae29-31d8c2747b3d" />
+
+# 🧠 Machine Learning Model
+
+Our project leverages **Edge Impulse** to deploy an optimized object detection model on the **ESP32-CAM**.
+
+### Dataset Preparation
+
+- 📷 Fire Images
+- 🌳 Non-Fire Images
+- 🔥 Indoor Fire
+- 🌲 Outdoor Fire
+- 💡 Different Lighting Conditions
+
+### Training Pipeline
+
+```text
+Image Collection
+        │
+        ▼
+Data Annotation
+        │
+        ▼
+Data Augmentation
+        │
+        ▼
+Model Training (FOMO Object Detection)
+        │
+        ▼
+Model Validation
+        │
+        ▼
+Edge Impulse Deployment
+        │
+        ▼
+ESP32-CAM Inference
+```
+
+### Model Workflow
+
+```mermaid
+flowchart LR
+
+A[ESP32-CAM] --> B[Capture Image]
+
+B --> C[Resize Image]
+
+C --> D[Edge Impulse Model]
+
+D --> E{Fire Detected?}
+
+E -- Yes --> F[Generate Bounding Box]
+
+E -- No --> G[Continue Monitoring]
+
+F --> H[Send Detection Result]
+
+H --> I[Activate Fire Suppression System]
+```
+
+### Inference Process
+
+1. Capture image using ESP32-CAM.
+2. Convert the captured image into RGB888 format.
+3. Resize the image to match the model input size.
+4. Execute the Edge Impulse object detection model.
+5. Detect fire and generate bounding boxes.
+6. Send the detection result to the robot controller.
+7. Trigger the fire suppression mechanism if fire is confirmed.
+
+   ## 📊 ESP32-CAM Fire Detection Accuracy
+
+> **Note:** Replace these example values with your actual evaluation results if available.
+
+```mermaid
+xychart-beta
+    title "Fire Detection Accuracy Across Test Scenarios"
+    x-axis ["Indoor", "Outdoor", "Low Light", "Smoke", "Overall"]
+    y-axis "Accuracy (%)" 0 --> 100
+    bar [96, 93, 89, 91, 92]
+```
+## 📸 Project Progress
+
+
+
+<img width="960" height="1280" alt="image" src="https://github.com/user-attachments/assets/449f7f99-5c8a-4039-a3e6-56b2890d1d66" />
+
+<img width="960" height="1280" alt="bhjc " src="https://github.com/user-attachments/assets/b64ddbd4-ed60-4c91-9dd1-aa56ef78cad4" />
+
+
+
